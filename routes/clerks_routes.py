@@ -1,6 +1,9 @@
 from flask import Blueprint, request, jsonify
 from extensions import db
 from models.clerk import Clerk
+from models.records import Record
+from datetime import datetime
+from sqlalchemy import func
 
 clerk_bp = Blueprint("clerk", __name__)
 
@@ -36,6 +39,31 @@ def get_clerks():
             "created_at": c.created_at}
         for c in clerks
     ]), 200
+
+@clerk_bp.route("/clerk/dashboard", methods=["GET"])
+def clerk_dashboard():
+    records = Record.query
+
+    received = records.with_entities(
+        func.coalesce(func.sum(Record.items_received), 0)
+    ).scalar()
+
+    stock = records.with_entities(
+        func.coalesce(func.sum(Record.items_in_stock), 0)
+    ).scalar()
+
+    spoilt = records.with_entities(
+        func.coalesce(func.sum(Record.items_spoilt), 0)
+    ).scalar()
+
+    unpaid = records.filter_by(payment_status="unpaid").count()
+
+    return jsonify({"received": received,
+        "stock": stock,
+        "spoilt": spoilt,
+        "unpaid": unpaid,
+        "last_updated": datetime.now().isoformat()
+    }), 200
 
 # Route to get one clerk
 @clerk_bp.route("/clerks/<int:clerk_id>", methods=["GET"])

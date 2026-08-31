@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from db import db
-from suppliers import Supplier
+from extensions import db
+from models.suppliers import Supplier
 
 suppliers_bp = Blueprint('suppliers', __name__)
 

@@ -30,3 +30,6 @@ class Store(db.Model):
 
     def __repr__(self):
         return f"<Store {self.st_name}>"
+
+    payments = db.relationship("Payment", back_populates="store",
+    cascade="all, delete-orphan")

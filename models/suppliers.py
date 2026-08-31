@@ -1,5 +1,5 @@
 from datetime import datetime
-from db import db  # Importing shared SQLAlchemy instance
+from extensions import db  # Importing shared SQLAlchemy instance
 
 class Supplier(db.Model):
     __tablename__ = 'suppliers'
@@ -10,5 +10,4 @@ class Supplier(db.Model):
     email = db.Column(db.String(120), nullable=True)
     address = db.Column(db.String(255), nullable=True)
 
-    # Relationship to products supplied
-    products = db.relationship('Product', backref='supplier', lazy=True)
+    records = db.relationship('Record', back_populates='supplier')
