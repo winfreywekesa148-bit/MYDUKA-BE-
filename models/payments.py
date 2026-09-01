@@ -7,6 +7,7 @@ class Payment(db.Model):
     payment_id = db.Column(db.Integer, primary_key=True)
     record_id = db.Column(db.Integer, db.ForeignKey("records.record_id"), nullable=False)
     amount = db.Column(db.Numeric(10, 2),nullable=False)
+    store_id = db.Column(db.Integer, db.ForeignKey("store.store_id"), nullable=False)
     phone_number = db.Column(db.String(20), nullable=False)
     status = db.Column(db.String(20), nullable=False, default="pending")
     checkout_request_id = db.Column(db.String(100), nullable=True)
