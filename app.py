@@ -44,7 +44,7 @@ CORS(app,
      resources={
         r"/*": {
             "origins": [
-                "https://myduka-fe-mu.vercel.app"
+                "https://myduka-fe.vercel.app"
             ]
         }
     },
