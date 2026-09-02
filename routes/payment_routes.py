@@ -117,7 +117,7 @@ def merchant_pay():
     db.session.add(payment)
     db.session.commit()
 
-    response = requests.post("http://localhost:8000/api/stk",
+    response = requests.post("https://myduka-mpesa.onrender.com/api/stk",
         json={"phone": phone,
             "amount": amount})
 
