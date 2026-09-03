@@ -372,7 +372,7 @@ def create_record():
 
 
         return jsonify({
-            "Your inventory has been successfully entered",
+            "error": "Your inventory has been successfully entered",
             "details": str(e)
         }), 500
 
