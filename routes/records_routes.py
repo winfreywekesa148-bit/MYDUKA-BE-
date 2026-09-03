@@ -36,63 +36,193 @@ def inventory_options():
         "clerks": [clerk.clerk_name for clerk in Clerk.query.order_by(Clerk.clerk_name).all()],
     }), 200
 
-
 @records_bp.route("/records", methods=["POST"])
 def create_record():
+
     data = request.get_json(silent=True) or {}
+
     required_fields = [
-        "clerk_name", "product_name", "supplier_name", "store_name",
-        "items_received", "items_in_stock", "buying_price", "selling_price",
+        "clerk_id",
+        "store_id",
+        "product_name",
+        "supplier_name",
+        "items_received",
+        "items_in_stock",
+        "buying_price",
+        "selling_price",
     ]
-    missing = [field for field in required_fields if data.get(field) in (None, "")]
+
+    missing = [
+        field
+        for field in required_fields
+        if data.get(field) in (None, "")
+    ]
+
     if missing:
-        return jsonify({"error": f"{', '.join(missing)} is required"}), 400
+        return jsonify({
+            "error": f"{', '.join(missing)} is required"
+        }), 400
+
+
+    # =====================================================
+    # GET CLERK AND STORE BY ID
+    # =====================================================
+
+    try:
+        clerk_id = int(data["clerk_id"])
+        store_id = int(data["store_id"])
+    except (ValueError, TypeError):
+
+        return jsonify({
+            "error": "clerk_id and store_id must be valid numbers"
+        }), 400
+
+
+    clerk = db.session.get(Clerk, clerk_id)
+
+    if not clerk:
+
+        return jsonify({
+            "error": "Clerk not found",
+            "clerk_id": clerk_id
+        }), 404
+
+
+    store = db.session.get(Store, store_id)
+
+    if not store:
+
+        return jsonify({
+            "error": "Store not found",
+            "store_id": store_id
+        }), 404
+
+
+    # =====================================================
+    # CHECK CLERK BELONGS TO STORE
+    # =====================================================
+
+    if clerk.store_id != store.store_id:
+
+        return jsonify({
+            "error": "This clerk does not belong to the selected store"
+        }), 400
+
+
+    # =====================================================
+    # PRODUCT
+    # =====================================================
 
     product_name = data["product_name"].strip()
-    supplier_name = data["supplier_name"].strip()
-    if not product_name or not supplier_name:
-        return jsonify({"error": "Product and supplier names cannot be blank."}), 400
-    store = Store.query.filter_by(st_name=data["store_name"]).first()
-    clerk = Clerk.query.filter_by(clerk_name=data["clerk_name"]).first()
-    if not store or not clerk:
-        return jsonify({"error": "Choose a valid clerk and store."}), 400
-    if clerk.store_id != store.store_id:
-        return jsonify({"error": "The selected clerk does not belong to that store."}), 400
 
-    product = Product.query.filter(Product.name.ilike(product_name)).first()
+    if not product_name:
+
+        return jsonify({
+            "error": "Product name cannot be blank"
+        }), 400
+
+
+    product = Product.query.filter(
+        Product.name.ilike(product_name)
+    ).first()
+
+
     if not product:
+
         product = Product(
             name=product_name,
             category=data.get("category"),
             buying_price=data["buying_price"],
             selling_price=data["selling_price"],
         )
+
         db.session.add(product)
 
-    supplier = Supplier.query.filter(Supplier.name.ilike(supplier_name)).first()
+
+    # =====================================================
+    # SUPPLIER
+    # =====================================================
+
+    supplier_name = data["supplier_name"].strip()
+
+    if not supplier_name:
+
+        return jsonify({
+            "error": "Supplier name cannot be blank"
+        }), 400
+
+
+    supplier = Supplier.query.filter(
+        Supplier.name.ilike(supplier_name)
+    ).first()
+
+
     if not supplier:
-        supplier = Supplier(name=supplier_name)
+
+        supplier = Supplier(
+            name=supplier_name
+        )
+
         db.session.add(supplier)
+
+
+    # =====================================================
+    # FLUSH
+    # =====================================================
 
     db.session.flush()
 
-    record = Record(
-        clerk_id=clerk.clerk_id,
-        product_id=product.product_id,
-        supplier_id=supplier.supplier_id,
-        store_id=store.store_id,
-        admin_id=clerk.admin_id,
-        items_received=data["items_received"],
-        items_in_stock=data["items_in_stock"],
-        items_spoilt=data.get("items_spoilt", 0),
-        buying_price=data["buying_price"],
-        selling_price=data["selling_price"],
-        payment_status=data.get("payment_status", "unpaid"),
-    )
-    db.session.add(record)
-    db.session.commit()
-    return jsonify({"message": "Inventory record created successfully", "record": serialize_record(record)}), 201
 
+    # =====================================================
+    # CREATE RECORD
+    # =====================================================
+
+    record = Record(
+
+        clerk_id=clerk_id,
+
+        product_id=product.product_id,
+
+        supplier_id=supplier.supplier_id,
+
+        store_id=store_id,
+
+        admin_id=clerk.admin_id,
+
+        items_received=data["items_received"],
+
+        items_in_stock=data["items_in_stock"],
+
+        items_spoilt=data.get(
+            "items_spoilt",
+            0
+        ),
+
+        buying_price=data["buying_price"],
+
+        selling_price=data["selling_price"],
+
+        payment_status=data.get(
+            "payment_status",
+            "unpaid"
+        ),
+    )
+
+
+    db.session.add(record)
+
+    db.session.commit()
+
+
+    return jsonify({
+
+        "message":
+            "Inventory record created successfully",
+
+        "record":
+            serialize_record(record)
+
+    }), 201
 
 @records_bp.route("/records", methods=["GET"])
 def get_records():
