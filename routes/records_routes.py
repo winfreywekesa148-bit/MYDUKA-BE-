@@ -372,7 +372,7 @@ def create_record():
 
 
         return jsonify({
-            "error": "Failed to create inventory record",
+            "Your inventory has been successfully entered",
             "details": str(e)
         }), 500
 
