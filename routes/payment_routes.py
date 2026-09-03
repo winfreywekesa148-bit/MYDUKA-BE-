@@ -93,13 +93,6 @@ def create_payment():
                 "error": "record_id, amount and phone_number are required"
             }), 400
 
-        record = Record.query.get(record_id)
-
-        if not record:
-            return jsonify({
-                "error": "Record not found"
-            }), 404
-
         new_payment = Payment(
             record_id=record_id,
             amount=amount,
