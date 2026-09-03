@@ -4,8 +4,8 @@ import os
 import base64
 from datetime import datetime
 
-payment_bp = Blueprint(
-    "payment_bp",
+payments_bp = Blueprint(
+    "payments_bp",
     __name__,
     url_prefix="/merchant"
 )
@@ -55,7 +55,7 @@ def get_mpesa_token():
 # STK PUSH
 # --------------------------------------------------
 
-@payment_bp.route("/pay", methods=["POST"])
+@payments_bp.route("/pay", methods=["POST"])
 def pay():
 
     try:
@@ -238,7 +238,7 @@ def pay():
 # MPESA CALLBACK
 # --------------------------------------------------
 
-@payment_bp.route("/callback", methods=["POST"])
+@payments_bp.route("/callback", methods=["POST"])
 def mpesa_callback():
 
     try:
