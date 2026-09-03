@@ -40,7 +40,15 @@ app.config.from_object(Config)
 db.init_app(app)
 jwt.init_app(app)
 ma.init_app(app)
-CORS(app, origins="*", supports_credentials=True)
+CORS(app,
+    resources={
+        r"/*": {
+            "origins": [
+                "https://myduka-fe-ke8m.vercel.app"
+            ]
+        }
+    },
+     supports_credentials=True)
 
 # =========================================================
 # REGISTER BLUEPRINTS
