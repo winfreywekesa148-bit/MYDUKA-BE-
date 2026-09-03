@@ -67,7 +67,7 @@ def pay():
                 "error": "Request body is required"
             }), 400
 
-        phone = data.get("phone")
+        phone = data.get("phone_number")
         amount = data.get("amount")
 
         if not phone:
