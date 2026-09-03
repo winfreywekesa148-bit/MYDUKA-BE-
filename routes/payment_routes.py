@@ -12,6 +12,7 @@ def create_payment():
     data = request.get_json()
 
     record_id = data.get("record_id")
+    store_id = data.get("store_id")
     amount = data.get("amount")
     phone_number = data.get("phone_number")
 
